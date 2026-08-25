@@ -13,7 +13,7 @@ source venv/bin/activate      # Mac/Linux
 # Install packages
 pip install -r requirements.txt
 ```
-
+[For demo use these 3d models]([https://www.example.com](https://www.dropbox.com/scl/fi/6efup52i97dt29odejgwr/pcd-2.zip?rlkey=d3a7yv1icinnfz9j2iyq78le7&st=9abtapqd&e=1&dl=0))
 ## 2. Mandatory Pre-Run Steps
 You must manually configure your layout tracking, asset paths, and threshold tolerances before launching scripts:
 
