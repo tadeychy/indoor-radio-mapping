@@ -61,7 +61,7 @@ mesh = o3d.io.read_triangle_mesh('ply/mesh/final_mesh_rotated_cut.ply')
 matrix_ind = np.array(matrix, dtype=np.float64)
 y_indices, x_indices = np.nonzero(matrix_ind)
 # 3. UNIFY SCALING (Using Meters)
-grid_spacing = 0.25 # Adjust if your matrix cell spacing isn't 1 meter
+grid_spacing = 0.25
 x_offset = 4.5
 y_offset = 3.5
 z_offset = 0.5
