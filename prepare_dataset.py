@@ -90,8 +90,7 @@ for i in range(20):
                 matrix2[i][col] = cleaned_x[(matrix[i][col] - 1) + (26 * (index_search))]
     data_group = np.array(matrix2, dtype=np.float64)
     data_groups.append(data_group)
-print(len(data_groups))
-print(len(list))
+
 feature_maps = IJS.generate_ap_feature_maps(data_groups, matrix, list, mesh,
                                         grid_spacing=grid_spacing, x_offset=x_offset, y_offset=y_offset, z_offset=z_offset, ap_z=0)
 
