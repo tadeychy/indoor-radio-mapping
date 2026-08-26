@@ -79,15 +79,11 @@ cleaned_x = [int(i.replace("dBm", "")) for i in x]
 
 for i in range(20):
     setup = i
-    if setup <= 20:
-        index_search = setup - 1
-    else:
-        index_search = setup - 21
     matrix2 = [row[:] for row in matrix]
-    for i in range(0, 27):
+    for row in range(0, 26):
         for col in range(0, 30):
-            if matrix2[i][col] != 0:
-                matrix2[i][col] = cleaned_x[(matrix[i][col] - 1) + (26 * (index_search))]
+            if matrix2[row][col] != 0:
+                matrix2[row][col] = cleaned_x[(matrix[row][col] - 1) + (26 * (i))]
     data_group = np.array(matrix2, dtype=np.float64)
     data_groups.append(data_group)
 
