@@ -623,7 +623,7 @@ def generate_ap_feature_maps(data_groups, matrix_inds, ap_locations, mesh,
         ])
         # Distance map
         print(f"  Computing distances...")
-        distances = np.linalg.norm(points_meas - ap_point, axis=1)
+        distances = np.linalg.norm(points_meas - ap_point, axis=1)*2
 
         # Wall count map
         print(f"  Casting rays for wall estimation...")
