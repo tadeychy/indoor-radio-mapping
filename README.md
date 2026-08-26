@@ -32,8 +32,8 @@ Once configuration parameters match your target scenario, execute the scripts se
 
 ```bash
 # Step 1: Process geometric features and compile model weights
-python train.py
+python prepare_dataset.py
 
 # Step 2: Calculate coordinates and render the interactive 3D map
-python main.py
+python final.py
 ```
