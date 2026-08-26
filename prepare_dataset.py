@@ -140,5 +140,5 @@ torch.save({
     "scaler_X":    scaler_X,
     "metrics_val": metrics_val,
     "metrics_test": metrics_test,
-}, "ena.pt")
-print("\nModel saved to rssi_estimator2.4G.pt")
+}, "model.pt")
+print("\nModel saved to pt file")
