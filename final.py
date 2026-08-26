@@ -38,50 +38,6 @@ ply_file = ("ply/mesh/final_mesh_rotated_cut.ply")
 # ==========================================
 # 2. PURE 3D GEOMETRY HELPER FUNCTIONS
 # ==========================================
-def estimate_wall_count(mesh, ap_point, measurement_points, max_walls=10):
-    """
-    Counts raycast surface intersections strictly from 3D geometry.
-    """
-    scene = o3d.t.geometry.RaycastingScene()
-    mesh_t = o3d.t.geometry.TriangleMesh.from_legacy(mesh)
-    scene.add_triangles(mesh_t)
-
-    ap = np.array(ap_point, dtype=np.float32)
-    wall_counts = np.zeros(len(measurement_points), dtype=int)
-
-    for i, meas_pt in enumerate(measurement_points):
-        meas_pt = np.array(meas_pt, dtype=np.float32)
-        direction = meas_pt - ap
-        total_distance = np.linalg.norm(direction)
-
-        if total_distance < 1e-6:
-            continue
-
-        direction_normalized = direction / total_distance
-
-        n_intersections = 0
-        current_origin = ap.copy()
-        epsilon = 0.01  # Offset to prevent re-hitting same surface
-
-        for _ in range(max_walls):
-            ray = o3d.core.Tensor(
-                [[*current_origin, *direction_normalized]],
-                dtype=o3d.core.Dtype.Float32
-            )
-            result = scene.cast_rays(ray)
-            hit_distance = result["t_hit"].numpy()[0]
-
-            if np.isinf(hit_distance) or hit_distance > total_distance:
-                break
-
-            n_intersections += 1
-            current_origin = current_origin + direction_normalized * (hit_distance + epsilon)
-            total_distance -= (hit_distance + epsilon)
-
-        wall_counts[i] = n_intersections
-
-    return wall_counts
-
 
 def generate_grid_from_mesh(mesh, spacing=0.25, height=0.4):
     """
