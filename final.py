@@ -3,7 +3,6 @@ import torch.nn as nn
 import open3d as o3d
 import numpy as np
 from scipy.optimize import differential_evolution
-from sklearn.preprocessing import StandardScaler
 import functions as IJS
 # ==========================================
 # 1. MODEL ARCHITECTURE
@@ -145,8 +144,9 @@ if __name__ == "__main__":
     sample_ap = (min_b + max_b) / 2.0
     sample_features = IJS.extract_features(sample_ap, grid_points, mesh, scene=raycast_scene)
 
-    scaler_X = StandardScaler()
-    scaler_X.fit(sample_features)
+    if isinstance(checkpoint, dict) and 'scaler_X' in checkpoint:
+        print("Loaded StandardScaler directly from checkpoint file.")
+        scaler_X = checkpoint['scaler_X']
 
     # --- Step 5: Sanitize Bounds & Run Optimization ---
     x_min, x_max = min(min_b[0], max_b[0]), max(min_b[0], max_b[0])
