@@ -84,8 +84,7 @@ for i in range(20):
         for col in range(0, 30):
             if matrix2[row][col] != 0:
                 matrix2[row][col] = cleaned_x[(matrix[row][col] - 1) + (26 * (i))]
-    data_group = np.array(matrix2, dtype=np.float64)
-    data_groups.append(data_group)
+    data_groups.append(np.array(matrix2, dtype=np.float64))
 
 feature_maps = IJS.generate_ap_feature_maps(data_groups, matrix, list, mesh,
                                         grid_spacing=grid_spacing, x_offset=x_offset, y_offset=y_offset, z_offset=z_offset, ap_z=0)
