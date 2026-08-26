@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import open3d as o3d
 import numpy as np
 
+
 def _predict(model, x_scaled):
     """
     Helper to predict using either Scikit-Learn or PyTorch models.
@@ -28,8 +29,9 @@ def _predict(model, x_scaled):
     else:
         return model.predict(x_scaled)
 
-#Mesh editing
-def rotate(pcd,x,y,z,save=False):
+
+# Mesh editing
+def rotate(pcd, x, y, z, save=False):
     """
     Rotates a mesh file.
 
@@ -41,11 +43,13 @@ def rotate(pcd,x,y,z,save=False):
         save (bool, optional): Save to file. Defaults to False.
     """
     pcd = o3d.io.read_triangle_mesh(pcd)
-    pcd.rotate(pcd.get_rotation_matrix_from_xyz((np.radians(x),np.radians(y), np.radians(z))))
+    pcd.rotate(pcd.get_rotation_matrix_from_xyz((np.radians(x), np.radians(y), np.radians(z))))
     if save:
         o3d.io.write_triangle_mesh("MHAB_rotated.ply", pcd)
     return pcd
-def cut_bellow(mesh,x=None,y=None,z=None,save=None):
+
+
+def cut_bellow(mesh, x=None, y=None, z=None, save=None):
     """
     Crops a 3D triangle mesh by raising its lower boundary along specified axes.
 
@@ -66,7 +70,7 @@ def cut_bellow(mesh,x=None,y=None,z=None,save=None):
     Returns:
         open3d.geometry.TriangleMesh: The cropped triangle mesh.
     """
-    mesh =o3d.io.read_triangle_mesh(mesh)
+    mesh = o3d.io.read_triangle_mesh(mesh)
     min_bound = mesh.get_min_bound()
     max_bound = mesh.get_max_bound()
     if x is not None:
@@ -80,7 +84,9 @@ def cut_bellow(mesh,x=None,y=None,z=None,save=None):
     if save is not None:
         o3d.io.write_triangle_mesh(save, cut_mesh)
     return cut_mesh
-def cut_above(mesh,x=None,y=None,z=None,save=None):
+
+
+def cut_above(mesh, x=None, y=None, z=None, save=None):
     """
     Crops a 3D triangle mesh by lowering its upper boundary along specified axes.
 
@@ -101,7 +107,7 @@ def cut_above(mesh,x=None,y=None,z=None,save=None):
     Returns:
         open3d.geometry.TriangleMesh: The cropped triangle mesh.
     """
-    mesh =o3d.io.read_triangle_mesh(mesh)
+    mesh = o3d.io.read_triangle_mesh(mesh)
     min_bound = mesh.get_min_bound()
     max_bound = mesh.get_max_bound()
     if x is not None:
@@ -115,7 +121,9 @@ def cut_above(mesh,x=None,y=None,z=None,save=None):
     if save is not None:
         o3d.io.write_triangle_mesh(save, cut_mesh)
     return cut_mesh
-def cuting(pcd_or_mesh_input,offset,save):
+
+
+def cuting(pcd_or_mesh_input, offset, save):
     """Opens an interactive Open3D window to select 2 points and crops
 
         the geometry outside the bounding box defined by those points plus an offset.
@@ -179,9 +187,13 @@ def cuting(pcd_or_mesh_input,offset,save):
     points_array = np.asarray(pcd.points)
     p1 = points_array[picked_indices[0]]  # First point variable [x, y, z]
     p2 = points_array[picked_indices[1]]  # Second point variable [x, y, z]
-    cut_above(pcd_or_mesh_input,x=max(p1[0],p2[0])+offset,y=max(p1[1],p2[1])+offset,z=max(p1[2],p2[2])+offset,save=save)
-    cut_bellow(save,x=min(p1[0],p2[0])-offset,y=min(p1[1],p2[1])-offset,z=min(p1[2],p2[2])-offset,save=save)
-def point_to_triangle(pcd,depth=14,rem_den=5,radius=500,k=30,max_nn=30,save=None,):
+    cut_above(pcd_or_mesh_input, x=max(p1[0], p2[0]) + offset, y=max(p1[1], p2[1]) + offset,
+              z=max(p1[2], p2[2]) + offset, save=save)
+    cut_bellow(save, x=min(p1[0], p2[0]) - offset, y=min(p1[1], p2[1]) - offset, z=min(p1[2], p2[2]) - offset,
+               save=save)
+
+
+def point_to_triangle(pcd, depth=14, rem_den=5, radius=500, k=30, max_nn=30, save=None, ):
     """
     Transforms a point cloud file into a 3D triangle mesh using Poisson surface reconstruction.
 
@@ -210,15 +222,17 @@ def point_to_triangle(pcd,depth=14,rem_den=5,radius=500,k=30,max_nn=30,save=None
     mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
         pcd, depth=depth
     )
-    if rem_den!=0:
+    if rem_den != 0:
         densities = np.asarray(densities)
         density_threshold = np.percentile(densities, rem_den)  # Remove bottom 5%
         vertices_to_remove = densities < density_threshold
         mesh.remove_vertices_by_mask(vertices_to_remove)
-    if save!=None:
+    if save != None:
         o3d.io.write_triangle_mesh(save, mesh)
     return mesh
-#AI
+
+
+# AI
 def train_model(model, train_loader, val_loader, epochs=200, lr=1e-3, patience=20):
     """
     Train the MLP with early stopping based on validation loss.
@@ -239,7 +253,7 @@ def train_model(model, train_loader, val_loader, epochs=200, lr=1e-3, patience=2
     criterion = nn.MSELoss()
 
     best_val_loss = np.inf
-    best_weights  = None
+    best_weights = None
     patience_counter = 0
     history = {"train": [], "val": []}
 
@@ -265,7 +279,7 @@ def train_model(model, train_loader, val_loader, epochs=200, lr=1e-3, patience=2
                 val_losses.append(loss.item())
 
         train_loss = np.mean(train_losses)
-        val_loss   = np.mean(val_losses)
+        val_loss = np.mean(val_losses)
         scheduler.step(val_loss)
 
         history["train"].append(train_loss)
@@ -273,8 +287,8 @@ def train_model(model, train_loader, val_loader, epochs=200, lr=1e-3, patience=2
 
         # Early stopping
         if val_loss < best_val_loss:
-            best_val_loss    = val_loss
-            best_weights     = model.state_dict().copy()
+            best_val_loss = val_loss
+            best_weights = model.state_dict().copy()
             patience_counter = 0
         else:
             patience_counter += 1
@@ -283,12 +297,14 @@ def train_model(model, train_loader, val_loader, epochs=200, lr=1e-3, patience=2
                 break
 
         if (epoch + 1) % 20 == 0:
-            print(f"  Epoch {epoch+1:4d} | Train RMSE: {np.sqrt(train_loss):.3f} dBm"
+            print(f"  Epoch {epoch + 1:4d} | Train RMSE: {np.sqrt(train_loss):.3f} dBm"
                   f" | Val RMSE: {np.sqrt(val_loss):.3f} dBm")
 
     # Restore best weights
     model.load_state_dict(best_weights)
     return model, history
+
+
 def evaluate_model(model, loader, scaler_X, scaler_y, split_name="Test"):
     """
     Evaluate the model and print MAE, RMSE, and R2 metrics.
@@ -302,15 +318,15 @@ def evaluate_model(model, loader, scaler_X, scaler_y, split_name="Test"):
             preds.append(pred.numpy())
             targets.append(y_batch.numpy())
 
-    preds   = np.concatenate(preds)
+    preds = np.concatenate(preds)
     targets = np.concatenate(targets)
 
     # Inverse transform if targets were scaled
-    mae  = np.mean(np.abs(preds - targets))
+    mae = np.mean(np.abs(preds - targets))
     rmse = np.sqrt(np.mean((preds - targets) ** 2))
     ss_res = np.sum((targets - preds) ** 2)
     ss_tot = np.sum((targets - targets.mean()) ** 2)
-    r2   = 1 - ss_res / ss_tot
+    r2 = 1 - ss_res / ss_tot
 
     print(f"\n{split_name} Results:")
     print(f"  MAE:  {mae:.3f} dBm")
@@ -318,17 +334,23 @@ def evaluate_model(model, loader, scaler_X, scaler_y, split_name="Test"):
     print(f"  R﷿﷿:   {r2:.4f}")
 
     return preds, targets, {"mae": mae, "rmse": rmse, "r2": r2}
+
+
 def to_tensors(X, y):
     return TensorDataset(torch.tensor(X), torch.tensor(y))
+
+
 def log_distance_model(distances, n, A, eps=1e-6):
     """Standard log-distance path loss model."""
     d_meters = np.maximum(distances / 1000, eps)  # avoid log10(0)
     return A - 10 * n * np.log10(d_meters)
 
+
 def itu_model(distances, walls, n, A, L_wall, eps=1e-6):
     """ITU indoor path loss model with wall attenuation."""
     d_meters = np.maximum(distances / 1000, eps)  # avoid log10(0)
     return A - 20 * np.log10(d_meters) - walls * L_wall
+
 
 def fit_log_distance(X_train, y_train):
     """Fit log-distance model by least squares."""
@@ -357,6 +379,8 @@ def fit_log_distance(X_train, y_train):
 
     print(f"  Log-distance fitted: n={popt[0]:.2f}, A={popt[1]:.2f}")
     return popt
+
+
 def fit_itu(X_train, y_train):
     """Fit ITU model by least squares."""
     distances, walls = X_train[:, 0], X_train[:, 1]
@@ -383,47 +407,55 @@ def fit_itu(X_train, y_train):
     print(f"  ITU fitted: n={popt[0]:.2f}, A={popt[1]:.2f}, L_wall={popt[2]:.2f}")
     return popt
 
-def coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_threshold=-90):
+
+def coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_threshold=-90, scene=None):
     """
     Surrogate-based coverage score for a given AP position.
     Returns fraction of grid points above RSSI threshold (higher = better).
+
+    Args:
+        scene (o3d.t.geometry.RaycastingScene, optional): Pre-built raycasting
+            scene for `mesh` to avoid rebuilding the BVH on every call inside
+            an optimization loop.
     """
     ap_position = np.array(ap_position)
 
     # Compute features for all grid points
-    distances  = np.linalg.norm(grid_points - ap_position, axis=1)
-    wall_counts = estimate_wall_count(mesh, ap_position, grid_points)
+    distances = np.linalg.norm(grid_points - ap_position, axis=1)
+    wall_counts = estimate_wall_count(mesh, ap_position, grid_points, scene=scene)
     X = np.column_stack([distances, wall_counts]).astype(np.float32)
     X_scaled = scaler_X.fit_transform(X)
 
     # Predict RSSI using surrogate
-    #rssi_pred = model.predict(X_scaled)  # use SVR or GP as surrogate
+    # rssi_pred = model.predict(X_scaled)  # use SVR or GP as surrogate
     rssi_pred = _predict(model, X_scaled)
     coverage = np.mean(rssi_pred >= rssi_threshold)
     return -coverage  # negative because scipy minimizes
+
+
 def evaluate_all(X_train, y_train, X_val, y_val, X_test, y_test,
                  mlp_model=None, test_loader=None):
     results = {}
 
     estimators = {
-        "Linear Regression":    LinearRegression(),
-        "Ridge":                Ridge(alpha=1.0),
-        "Random Forest":        RandomForestRegressor(n_estimators=100, random_state=42),
-        "Gradient Boosting":    GradientBoostingRegressor(n_estimators=100, random_state=42),
-        "SVR":                  SVR(kernel="rbf", C=10, epsilon=0.5),
-        "XGBoost":              xgb.XGBRegressor(n_estimators=100, random_state=42),
-        "Gaussian Process":     GaussianProcessRegressor(
-                                    kernel=RBF() + WhiteKernel(), normalize_y=True
-                                ),
+        "Linear Regression": LinearRegression(),
+        "Ridge": Ridge(alpha=1.0),
+        "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42),
+        "Gradient Boosting": GradientBoostingRegressor(n_estimators=100, random_state=42),
+        "SVR": SVR(kernel="rbf", C=10, epsilon=0.5),
+        "XGBoost": xgb.XGBRegressor(n_estimators=100, random_state=42),
+        "Gaussian Process": GaussianProcessRegressor(
+            kernel=RBF() + WhiteKernel(), normalize_y=True
+        ),
     }
 
     for name, est in estimators.items():
         est.fit(X_train, y_train)
         preds = est.predict(X_test)
         results[name] = {
-            "mae":  mean_absolute_error(y_test, preds),
+            "mae": mean_absolute_error(y_test, preds),
             "rmse": np.sqrt(mean_squared_error(y_test, preds)),
-            "r2":   r2_score(y_test, preds),
+            "r2": r2_score(y_test, preds),
         }
         print(f"{name:25s} | MAE: {results[name]['mae']:.3f} | "
               f"RMSE: {results[name]['rmse']:.3f} | R﷿﷿: {results[name]['r2']:.4f}")
@@ -432,9 +464,9 @@ def evaluate_all(X_train, y_train, X_val, y_val, X_test, y_test,
     n, A = fit_log_distance(X_train, y_train)
     preds_ld = log_distance_model(X_test[:, 0], n, A)
     results["Log-Distance"] = {
-        "mae":  mean_absolute_error(y_test, preds_ld),
+        "mae": mean_absolute_error(y_test, preds_ld),
         "rmse": np.sqrt(mean_squared_error(y_test, preds_ld)),
-        "r2":   r2_score(y_test, preds_ld),
+        "r2": r2_score(y_test, preds_ld),
     }
     print(f"{'Log-Distance':25s} | MAE: {results['Log-Distance']['mae']:.3f} | "
           f"RMSE: {results['Log-Distance']['rmse']:.3f} | "
@@ -443,11 +475,11 @@ def evaluate_all(X_train, y_train, X_val, y_val, X_test, y_test,
     n, A, L = fit_itu(X_train, y_train)
     preds_itu = itu_model(X_test[:, 0], X_test[:, 1], n, A, L)
     results["ITU Indoor"] = {
-        "mae":  mean_absolute_error(y_test, preds_itu),
+        "mae": mean_absolute_error(y_test, preds_itu),
         "rmse": np.sqrt(mean_squared_error(y_test, preds_itu)),
-        "r2":   r2_score(y_test, preds_itu),
+        "r2": r2_score(y_test, preds_itu),
     }
-    
+
     print(f"{'ITU Indoor':25s} | MAE: {results['ITU Indoor']['mae']:.3f} | "
           f"RMSE: {results['ITU Indoor']['rmse']:.3f} | "
           f"R﷿﷿: {results['ITU Indoor']['r2']:.4f} | "
@@ -461,36 +493,45 @@ def evaluate_all(X_train, y_train, X_val, y_val, X_test, y_test,
             for X_batch, y_batch in test_loader:
                 preds_mlp.append(mlp_model(X_batch).numpy())
                 targets_mlp.append(y_batch.numpy())
-        preds_mlp   = np.concatenate(preds_mlp)
+        preds_mlp = np.concatenate(preds_mlp)
         targets_mlp = np.concatenate(targets_mlp)
         results["MLP"] = {
-            "mae":  mean_absolute_error(targets_mlp, preds_mlp),
+            "mae": mean_absolute_error(targets_mlp, preds_mlp),
             "rmse": np.sqrt(mean_squared_error(targets_mlp, preds_mlp)),
-            "r2":   r2_score(targets_mlp, preds_mlp),
+            "r2": r2_score(targets_mlp, preds_mlp),
         }
         print(f"{'MLP':25s} | MAE: {results['MLP']['mae']:.3f} | "
               f"RMSE: {results['MLP']['rmse']:.3f} | R﷿﷿: {results['MLP']['r2']:.4f}")
 
     return results, estimators
-#mesh measuring
-def estimate_wall_count(mesh, ap_point, measurement_points, max_walls=10):
+
+
+# mesh measuring
+def estimate_wall_count(mesh, ap_point, measurement_points, max_walls=10, scene=None):
     """
     Estimate the number of surfaces (walls) between the AP and each
     measurement point using ray casting.
 
     Args:
-        mesh (o3d.geometry.TriangleMesh): Reconstructed surface mesh.
+        mesh (o3d.geometry.TriangleMesh): Reconstructed surface mesh. Only used
+            to build a scene if `scene` is not provided.
         ap_point (np.ndarray): AP position as [x, y, z].
         measurement_points (np.ndarray): Measurement positions as (N, 3) array.
         max_walls (int): Maximum number of walls to count per ray (default 10).
+        scene (o3d.t.geometry.RaycastingScene, optional): Pre-built raycasting
+            scene (BVH already constructed) for `mesh`. Passing this avoids
+            rebuilding the BVH on every call, which is the dominant cost when
+            this function runs inside an optimization loop. If None, a scene
+            is built from `mesh` as before (unchanged fallback behavior).
 
     Returns:
         wall_counts (np.ndarray): Number of walls crossed for each measurement point.
     """
-    # Build raycasting scene from mesh
-    scene = o3d.t.geometry.RaycastingScene()
-    mesh_t = o3d.t.geometry.TriangleMesh.from_legacy(mesh)
-    scene.add_triangles(mesh_t)
+    # Reuse a pre-built scene if given; otherwise build one from mesh (old behavior)
+    if scene is None:
+        scene = o3d.t.geometry.RaycastingScene()
+        mesh_t = o3d.t.geometry.TriangleMesh.from_legacy(mesh)
+        scene.add_triangles(mesh_t)
 
     ap = np.array(ap_point, dtype=np.float32)
     wall_counts = np.zeros(len(measurement_points), dtype=int)
@@ -531,6 +572,8 @@ def estimate_wall_count(mesh, ap_point, measurement_points, max_walls=10):
         wall_counts[i] = n_intersections
 
     return wall_counts
+
+
 def prepare_dataset(data_groups, feature_maps):
     """
     Prepare features (distance, wall count) and targets (RSSI) for all setups.
@@ -554,8 +597,8 @@ def prepare_dataset(data_groups, feature_maps):
             if np.isnan(rssi):
                 continue
 
-            distance  = fm["distances"][j]
-            walls     = fm["wall_counts"][j]
+            distance = fm["distances"][j]
+            walls = fm["wall_counts"][j]
 
             X_all.append([distance, walls])
             y_all.append(rssi)
@@ -565,9 +608,10 @@ def prepare_dataset(data_groups, feature_maps):
             np.array(y_all, dtype=np.float32),
             np.array(setup_idx_all))
 
+
 def generate_ap_feature_maps(data_groups, matrix_inds, ap_locations, mesh,
-                              grid_spacing=1.0, x_offset=9200, y_offset=25000,
-                              z_offset=-2300, ap_z=1200):
+                             grid_spacing=1.0, x_offset=9200, y_offset=25000,
+                             z_offset=-2300, ap_z=1200):
     """
     Generate a feature map for each AP configuration, containing:
         - Distance from AP to each measurement point
@@ -602,9 +646,9 @@ def generate_ap_feature_maps(data_groups, matrix_inds, ap_locations, mesh,
     for setup_idx in range(len(data_groups)):
         print(f"\nProcessing AP configuration {setup_idx + 1}/{len(data_groups)}...")
 
-        matrix     = data_groups[setup_idx]
+        matrix = data_groups[setup_idx]
         matrix_ind = matrix_inds
-        ap_loc     = ap_locations[setup_idx]
+        ap_loc = ap_locations[setup_idx]
 
         # Measurement points
         y_indices, x_indices = np.nonzero(matrix)
@@ -623,37 +667,39 @@ def generate_ap_feature_maps(data_groups, matrix_inds, ap_locations, mesh,
         ])
         # Distance map
         print(f"  Computing distances...")
-        distances = np.linalg.norm(points_meas - ap_point, axis=1)*2
+        distances = np.linalg.norm(points_meas - ap_point, axis=1) * 2
 
         # Wall count map
         print(f"  Casting rays for wall estimation...")
-        wall_counts = estimate_wall_count(mesh, ap_point, points_meas)
+        wall_counts = estimate_wall_count(mesh, ap_point, points_meas, scene=scene)
 
         # Fill 2D grids
         distance_map = np.full(matrix.shape, np.nan)
-        wall_map     = np.full(matrix.shape, np.nan)
+        wall_map = np.full(matrix.shape, np.nan)
 
         for idx, (r, c) in enumerate(zip(y_indices, x_indices)):
             distance_map[r, c] = distances[idx]
-            wall_map[r, c]     = wall_counts[idx]
+            wall_map[r, c] = wall_counts[idx]
 
         feature_maps.append({
-            "distance_map":  distance_map,
-            "wall_map":      wall_map,
-            "ap_point":      ap_point,
-            "points_meas":   points_meas,
-            "grid_indices":  (y_indices, x_indices),
-            "distances":     distances,
-            "wall_counts":   wall_counts,
+            "distance_map": distance_map,
+            "wall_map": wall_map,
+            "ap_point": ap_point,
+            "points_meas": points_meas,
+            "grid_indices": (y_indices, x_indices),
+            "distances": distances,
+            "wall_counts": wall_counts,
         })
 
         print(f"  Distance range: [{distances.min():.0f}, {distances.max():.0f}] mm")
         print(f"  Wall count range: [{wall_counts.min()}, {wall_counts.max()}]")
 
     return feature_maps
-#visualisation
+
+
+# visualisation
 def visualize_optimal_ap(mesh, grid_points, optimal_ap, svr_model, scaler_X,
-                          rssi_threshold=-40, z_offset=-2300):
+                         rssi_threshold=-40, z_offset=-2300):
     """
     Visualize the optimal AP position on the reconstructed point cloud,
     with measurement points colored by predicted RSSI.
@@ -668,34 +714,33 @@ def visualize_optimal_ap(mesh, grid_points, optimal_ap, svr_model, scaler_X,
         z_offset: z offset used in point cloud alignment
 """
     # Predict RSSI for all grid points from optimal AP position
-    distances   = np.linalg.norm(grid_points - optimal_ap, axis=1)
+    distances = np.linalg.norm(grid_points - optimal_ap, axis=1)
 
     wall_counts = estimate_wall_count(mesh, optimal_ap, grid_points)
-    X_opt       = scaler_X.transform(np.column_stack([distances, wall_counts]))
-    rssi_pred   = svr_model.predict(X_opt)
+    X_opt = scaler_X.transform(np.column_stack([distances, wall_counts]))
+    rssi_pred = svr_model.predict(X_opt)
     above_threshold = rssi_pred >= rssi_threshold
     coverage = np.mean(above_threshold)
     print(f"Predicted coverage at optimal AP: {coverage:.1%}")
     print(f"RSSI range: [{rssi_pred.min():.1f}, {rssi_pred.max():.1f}] dBm")
 
     # ﷿﷿﷿﷿﷿﷿ Convert mesh to PyVista ﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿
-    vertices  = np.asarray(mesh.vertices)
+    vertices = np.asarray(mesh.vertices)
     triangles = np.asarray(mesh.triangles)
-    faces     = np.hstack([np.full((len(triangles), 1), 3), triangles])
-    pv_mesh   = pv.PolyData(vertices, faces)
+    faces = np.hstack([np.full((len(triangles), 1), 3), triangles])
+    pv_mesh = pv.PolyData(vertices, faces)
 
     # Height-based coloring for mesh
-    z_vals       = vertices[:, 2]
-    z_norm       = (z_vals - z_vals.min()) / (z_vals.max() - z_vals.min())
+    z_vals = vertices[:, 2]
+    z_norm = (z_vals - z_vals.min()) / (z_vals.max() - z_vals.min())
     pv_mesh["height"] = z_norm
-
 
     # ﷿﷿﷿﷿﷿﷿ Measurement points colored by predicted RSSI ﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿
     meas_pv = pv.PolyData(grid_points)
-    #for i in range(len(grid_points)):
+    # for i in range(len(grid_points)):
     #    grid_points[i][2] = 0.4
     meas_pv["RSSI (dBm)"] = rssi_pred
-    #optimal_ap[2] = 0.4
+    # optimal_ap[2] = 0.4
     # ﷿﷿﷿﷿﷿﷿ Optimal AP marker ﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿﷿
     ap_sphere = pv.Sphere(radius=0.2, center=optimal_ap)
 
@@ -737,13 +782,23 @@ def visualize_optimal_ap(mesh, grid_points, optimal_ap, svr_model, scaler_X,
     plotter.add_legend()
     plotter.show()
     return pv_mesh
-def extract_features(ap_position, grid_points, mesh):
+
+
+def extract_features(ap_position, grid_points, mesh, scene=None):
     """
     Computes [distance, wall_count] feature array X without CSV file context.
+
+    Args:
+        scene (o3d.t.geometry.RaycastingScene, optional): Pre-built raycasting
+            scene for `mesh`. Pass this when calling extract_features inside
+            an optimization loop (e.g. differential_evolution) so the BVH is
+            built once instead of once per candidate AP position.
     """
-    distances = np.linalg.norm(grid_points - ap_position, axis=1) *2 #Kiri seems to halve sizes in 3d scans
-    wall_counts = estimate_wall_count(mesh, ap_position, grid_points)
+    distances = np.linalg.norm(grid_points - ap_position, axis=1) * 2  # Kiri seems to halve sizes in 3d scans
+    wall_counts = estimate_wall_count(mesh, ap_position, grid_points, scene=scene)
     return np.column_stack([distances, wall_counts]).astype(np.float32)
+
+
 def visualize_results(mesh, grid_points, optimal_ap, model, scaler_X, rssi_threshold=-60):
     X_raw = extract_features(optimal_ap, grid_points, mesh)
     X_scaled = scaler_X.transform(X_raw)
@@ -774,19 +829,21 @@ def visualize_results(mesh, grid_points, optimal_ap, model, scaler_X, rssi_thres
                      font_size=11)
     plotter.add_legend()
     plotter.show()
+
+
 def plot_comparison(results):
     names = list(results.keys())
-    maes  = [results[n]["mae"]  for n in names]
+    maes = [results[n]["mae"] for n in names]
     rmses = [results[n]["rmse"] for n in names]
-    r2s   = [results[n]["r2"]   for n in names]
+    r2s = [results[n]["r2"] for n in names]
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 
     for ax, values, label, color in zip(
-        axes,
-        [maes, rmses, r2s],
-        ["MAE (dBm)", "RMSE (dBm)", "R﷿﷿"],
-        ["steelblue", "coral", "mediumseagreen"]
+            axes,
+            [maes, rmses, r2s],
+            ["MAE (dBm)", "RMSE (dBm)", "R﷿﷿"],
+            ["steelblue", "coral", "mediumseagreen"]
     ):
         bars = ax.barh(names, values, color=color)
         ax.bar_label(bars, fmt="%.3f", padding=3)
@@ -798,12 +855,13 @@ def plot_comparison(results):
     plt.tight_layout()
     plt.show()
 
+
 def plot_results(history, preds_val, targets_val, preds_test, targets_test):
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 
     # Loss curves
     axes[0].plot(history["train"], label="Train")
-    axes[0].plot(history["val"],   label="Validation")
+    axes[0].plot(history["val"], label="Validation")
     axes[0].set_xlabel("Epoch")
     axes[0].set_ylabel("MSE Loss")
     axes[0].set_title("Training History")
@@ -831,6 +889,8 @@ def plot_results(history, preds_val, targets_val, preds_test, targets_test):
 
     plt.tight_layout()
     plt.show()
+
+
 def plot_feature_maps(feature_maps, matrix_inds, ap_locations, grid_spacing=1.0):
     """
     Plot distance and wall count maps side by side for each AP configuration.
@@ -849,7 +909,8 @@ def plot_feature_maps(feature_maps, matrix_inds, ap_locations, grid_spacing=1.0)
         axes = axes[np.newaxis, :]
 
     for i, fm in enumerate(feature_maps):
-        ap_r, ap_c = np.where(matrix_inds == np.array(ap_locations[i]))#same story as on line 85 just with [i] on matrix_inds
+        ap_r, ap_c = np.where(
+            matrix_inds == np.array(ap_locations[i]))  # same story as on line 85 just with [i] on matrix_inds
 
         # Distance map
         ax = axes[i, 0]
@@ -872,6 +933,8 @@ def plot_feature_maps(feature_maps, matrix_inds, ap_locations, grid_spacing=1.0)
 
     plt.tight_layout()
     plt.show()
+
+
 def rssi_contour_plot(matrix, matrix_ind, ap_location, setup_num, save_figure=True):
     # Get the coordinates of nonzero values
 
@@ -892,8 +955,7 @@ def rssi_contour_plot(matrix, matrix_ind, ap_location, setup_num, save_figure=Tr
     for x in range(matrix.shape[0]):
         for y in range(matrix.shape[1]):
             if matrix[x, y] != 0:
-                plt.text(y + 0.2, x + 0.2, str(int(matrix_ind[x,y])), fontsize=9, color='cyan')
-
+                plt.text(y + 0.2, x + 0.2, str(int(matrix_ind[x, y])), fontsize=9, color='cyan')
 
     # Add the AP location (The Gold Star from the estimated plot)
     ap_x, ap_y = np.where(matrix_ind == ap_location)
