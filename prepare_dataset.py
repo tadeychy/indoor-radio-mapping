@@ -81,7 +81,7 @@ for i in range(20):
     setup = i
     matrix2 = [row[:] for row in matrix]
     for row in range(len(matrix)):
-        for col in range(0, 30):
+        for col in range(len(matrix[0])):
             if matrix2[row][col] != 0:
                 matrix2[row][col] = cleaned_x[(matrix[row][col] - 1) + (26 * (i))]
     data_groups.append(np.array(matrix2, dtype=np.float64))
