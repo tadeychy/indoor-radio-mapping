@@ -634,7 +634,7 @@ def generate_ap_feature_maps(data_groups, matrix_inds, ap_locations, mesh,
         wall_map     = np.full(matrix.shape, np.nan)
 
         for idx, (r, c) in enumerate(zip(y_indices, x_indices)):
-            distance_map[r, c] = distances[idx]*2000
+            distance_map[r, c] = distances[idx]
             wall_map[r, c]     = wall_counts[idx]
 
         feature_maps.append({
