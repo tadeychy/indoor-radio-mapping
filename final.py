@@ -62,12 +62,18 @@ def generate_grid_from_mesh(mesh, spacing=0.25, height=0.4):
 # ==========================================
 # 3. OPTIMIZATION OBJECTIVE
 # ==========================================
-def mlp_coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_threshold=-60):
+def mlp_coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_threshold=-60, scene=None):
     """
     Surrogate-based objective function evaluating PyTorch model predictions.
+
+    Args:
+        scene (o3d.t.geometry.RaycastingScene, optional): Pre-built raycasting
+            scene for `mesh`. Pass this so the BVH is built once outside the
+            optimizer instead of once per candidate AP position (differential_evolution
+            calls this hundreds of times).
     """
     # 1. Feature extraction strictly from 3D geometry
-    X_raw = IJS.extract_features(ap_position, grid_points, mesh)
+    X_raw = IJS.extract_features(ap_position, grid_points, mesh, scene=scene)
     X_scaled = scaler_X.transform(X_raw)
 
     # 2. Neural network inference
@@ -126,9 +132,18 @@ if __name__ == "__main__":
     bounds = mesh.get_axis_aligned_bounding_box()
     min_b, max_b = bounds.get_min_bound(), bounds.get_max_bound()
 
+    # --- Step 4b: Build the raycasting BVH once, reuse for every evaluation ---
+    # estimate_wall_count previously rebuilt this from scratch on every call
+    # (~930 rebuilds over the optimization run). Building it once here and
+    # threading it through mlp_coverage_score -> extract_features cuts that
+    # to a single build.
+    raycast_scene = o3d.t.geometry.RaycastingScene()
+    mesh_t = o3d.t.geometry.TriangleMesh.from_legacy(mesh)
+    raycast_scene.add_triangles(mesh_t)
+
     # Generate sample feature set from center AP position to fit realistic scale
     sample_ap = (min_b + max_b) / 2.0
-    sample_features = IJS.extract_features(sample_ap, grid_points, mesh)
+    sample_features = IJS.extract_features(sample_ap, grid_points, mesh, scene=raycast_scene)
 
     scaler_X = StandardScaler()
     scaler_X.fit(sample_features)
@@ -146,7 +161,7 @@ if __name__ == "__main__":
     result = differential_evolution(
         mlp_coverage_score,
         bounds=ap_search_bounds,
-        args=(mesh, grid_points, model, scaler_X, -60),
+        args=(mesh, grid_points, model, scaler_X, -60, raycast_scene),
         maxiter=30,
         popsize=10,
         seed=42,
