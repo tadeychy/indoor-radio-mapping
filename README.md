@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ## 2. Mandatory Pre-Run Steps
 You must manually configure your layout tracking, asset paths, and threshold tolerances before launching scripts:
 
-### A. Format & Set Up Your 3D Scan Data (`prepare_model.py` / `train.py`)
+### A. Format & Set Up Your 3D Scan Data (`prepare_dataset.py` / `training_model.py`)
 1. **Mesh Prep:** If you scanned multiple rooms, use `ply/merging.py` to join them. Convert point clouds to meshes using `point_to_triangle` from `functions.py`, clean up artifacts using a cutting function, and use the rotate tool (`-90°` on X, `205°` on Y for KIRI Engine scans) if your mesh orientation is misaligned.
 2. **Matrix Configuration:** Open `prepare_dataset.py` or your training script. Adjust the spatial coordinate matrix parameters, feature scaling profiles, your targeted input `.csv` log dataset paths, and the output file title to synchronize with your specific grid layout.
 
