@@ -823,7 +823,7 @@ def visualize_results(mesh, grid_points, optimal_ap, model, scaler_X, rssi_thres
     plotter = pv.Plotter()
     plotter.set_background("white")
     plotter.add_mesh(pv_mesh, scalars="height", cmap="gray", opacity=0.3, show_scalar_bar=False)
-    plotter.add_mesh(meas_pv, scalars="RSSI (dBm)", cmap="RdYlGn", point_size=12, render_points_as_spheres=True)
+    plotter.add_mesh(meas_pv, scalars="RSSI (dBm)", cmap="RdYlGn", point_size=24, render_points_as_spheres=True)
     plotter.add_mesh(ap_sphere, color="purple", label="Optimal AP")
     plotter.add_text(f"Optimal AP | Coverage: {coverage:.1%} above {rssi_threshold} dBm", position="upper_edge",
                      font_size=11)
