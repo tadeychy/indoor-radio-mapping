@@ -94,13 +94,13 @@ if __name__ == "__main__":
     # Construct measurement data groups (setups)
     data_groups = []
     matrix = MATRIX_INDS
-    for setup in range(20):
-        index_search = setup - 1 if setup <= 20 else setup - 21
+    for i in range(20):
+        setup = i
         matrix2 = [row[:] for row in matrix]
-        for r in range(27):
-            for c in range(30):
-                if matrix2[r][c] != 0:
-                    matrix2[r][c] = cleaned_x[(matrix[r][c] - 1) + (26 * index_search)]
+        for row in range(0, 26):
+            for col in range(0, 30):
+                if matrix2[row][col] != 0:
+                    matrix2[row][col] = cleaned_x[(matrix[row][col] - 1) + (26 * (i))]
         data_groups.append(np.array(matrix2, dtype=np.float64))
 
     print(f"Loaded {len(data_groups)} AP measurement setups.")
