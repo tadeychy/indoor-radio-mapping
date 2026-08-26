@@ -506,7 +506,7 @@ def estimate_wall_count(mesh, ap_point, measurement_points, max_walls=10):
         # Cast ray and collect all intersections along it
         n_intersections = 0
         current_origin = ap.copy()
-        epsilon = 1.0  # small offset in mm to avoid re-hitting the same surface
+        epsilon = 0.01  # small offset in mm to avoid re-hitting the same surface
 
         for _ in range(max_walls):
             ray = o3d.core.Tensor(
