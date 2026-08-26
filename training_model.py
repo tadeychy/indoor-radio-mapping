@@ -36,7 +36,7 @@ class RSSIEstimator(nn.Module):
 # ==========================================
 FREQ_BAND = "2.4"
 PLY_MESH_PATH = "ply/mesh/final_mesh_rotated_cut.ply"
-CSV_DATA_PATH = f"messurment data/2.4.csv"
+CSV_DATA_PATH = f"messurment data/{FREQ_BAND}.csv"
 PRETRAINED_MODEL_PATH = f"pt model/rssi_estimator{FREQ_BAND}G.pt"
 SAVED_MODEL_PATH = f"pt model/rssi_estimator{FREQ_BAND}G_updated.pt"
 
