@@ -35,10 +35,10 @@ freq_band = ("2.4")
 """
 #loading pcd
 file_path_pcd = "ply/pcd/final_pcd.ply"
-pcd = o3d.io.read_point_cloud(file_path)
+pcd = o3d.io.read_point_cloud(file_path_pcd)
 o3d.visualization.draw_geometries([pcd])
 #rotating pcd
-pcd_rot = IJS.rotate(x, -90, 205,0,save="ply/pcd/final_pcd_rot.ply")
+pcd_rot = IJS.rotate(pcd, -90, 205,0,save="ply/pcd/final_pcd_rot.ply")
 o3d.visualization.draw_geometries([pcd_rot])
 #pcd->mesh
 IJS.point_to_triangle("ply/pcd/final_pcd_rot.ply",save="ply/mesh/final_pcd_rot2.ply")
