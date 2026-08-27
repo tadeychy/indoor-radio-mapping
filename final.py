@@ -102,20 +102,15 @@ def mlp_coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_thr
     return -coverage  # Negative because scipy minimizes
 
 
-# ==========================================
-# 4. VISUALIZATION
-# ==========================================
-
-
 
 # ==========================================
-# 5. MAIN EXECUTION PIPELINE
+# 4. MAIN EXECUTION PIPELINE
 # ==========================================
 if __name__ == "__main__":
     # --- Step 1: Load 3D Model ---
     midpoint_z = float(mesh.get_axis_aligned_bounding_box().get_min_bound()[2]+((mesh.get_axis_aligned_bounding_box().get_max_bound()[2]-mesh.get_axis_aligned_bounding_box().get_min_bound()[2])/2))
     # --- Step 2: Auto-Generate Grid Points ---
-    grid_points = generate_grid_from_mesh(mesh, spacing=1, height=midpoint_z)
+    grid_points = generate_grid_from_mesh(mesh, spacing=0.5, height=midpoint_z)
     mesh_verts_2d = np.asarray(mesh.vertices)[:, :2]
 
     # Clearing out points which float in not dense areas.Remove/comment if you plan on stealing your neighbors wifi:)
