@@ -31,7 +31,7 @@ def _predict(model, x_scaled):
 
 
 # Mesh editing
-def rotate(pcd, x, y, z, save=False):
+def rotate(pcd, x, y, z, save=""):
     """
     Rotates a mesh file.
 
@@ -42,11 +42,18 @@ def rotate(pcd, x, y, z, save=False):
         z (int): Rotation of z axis in degrees.
         save (bool, optional): Save to file. Defaults to False.
     """
-    pcd = o3d.io.read_triangle_mesh(pcd)
-    pcd.rotate(pcd.get_rotation_matrix_from_xyz((np.radians(x), np.radians(y), np.radians(z))))
-    if save:
-        o3d.io.write_triangle_mesh("MHAB_rotated.ply", pcd)
-    return pcd
+    if isinstance(pcd, o3d.geometry.PointCloud):
+        pcd.rotate(pcd.get_rotation_matrix_from_xyz((np.radians(x), np.radians(y), np.radians(z))))
+        if save!="":
+            o3d.io.write_point_cloud(save, pcd)
+        return pcd
+
+    elif isinstance(pcd, o3d.geometry.TriangleMesh):
+        pcd.rotate(pcd.get_rotation_matrix_from_xyz((np.radians(x), np.radians(y), np.radians(z))))
+        if save!="":
+            o3d.io.write_triangle_mesh(save, pcd)
+        return pcd
+
 
 
 def cut_bellow(mesh, x=None, y=None, z=None, save=None):
