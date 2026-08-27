@@ -30,9 +30,25 @@ class RSSIEstimator(nn.Module):
 
 
 
-freq_band = "2.4"
-# One-liner execution for pristine PLY files
-ply_file = ("ply/mesh/final_mesh_rotated_cut.ply")
+freq_band = ("2.4")
+
+"""
+#loading pcd
+file_path_pcd = "ply/pcd/final_pcd.ply"
+pcd = o3d.io.read_point_cloud(file_path)
+o3d.visualization.draw_geometries([pcd])
+#rotating pcd
+pcd_rot = IJS.rotate(x, -90, 205,0,save="ply/pcd/final_pcd_rot.ply")
+o3d.visualization.draw_geometries([pcd_rot])
+#pcd->mesh
+IJS.point_to_triangle("ply/pcd/final_pcd_rot.ply",save="ply/mesh/final_pcd_rot2.ply")
+mesh = o3d.io.read_triangle_mesh("ply/mesh/final_pcd_rot2.ply")
+o3d.visualization.draw_geometries([mesh])
+#cuting
+IJS.cuting("ply/mesh/final_pcd_rot2.ply",0.2,"ply/mesh/final_pcd_rot3.ply")
+"""
+mesh = o3d.io.read_triangle_mesh("ply/mesh/final_pcd_rot3.ply")
+o3d.visualization.draw_geometries([mesh])
 
 # ==========================================
 # 2. PURE 3D GEOMETRY HELPER FUNCTIONS
@@ -97,8 +113,6 @@ def mlp_coverage_score(ap_position, mesh, grid_points, model, scaler_X, rssi_thr
 # ==========================================
 if __name__ == "__main__":
     # --- Step 1: Load 3D Model ---
-    mesh = o3d.io.read_triangle_mesh(ply_file)#if you are using unrotated mesh from Kiri engine use commented function bellow instead
-    #mesh = IJS.rotate(ply_file,-90,205,0)
     midpoint_z = float(mesh.get_axis_aligned_bounding_box().get_min_bound()[2]+((mesh.get_axis_aligned_bounding_box().get_max_bound()[2]-mesh.get_axis_aligned_bounding_box().get_min_bound()[2])/2))
     # --- Step 2: Auto-Generate Grid Points ---
     grid_points = generate_grid_from_mesh(mesh, spacing=1, height=midpoint_z)
